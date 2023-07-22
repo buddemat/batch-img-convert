@@ -19,12 +19,21 @@ argument_group.add_argument('-q', '--quiet', help='suppress output, mutually exc
                            action='store_true')
 args = parser.parse_args()
 
+# process args
 inpath = Path(args.inpath)
+# TODO: check if outpath exists? Or do that on creation?
+outpath = inpath / 'converted'
+
+if args.quiet:
+    verbosity = -1
+else:
+    verbosity = args.verbose
 
 # Temporary code 
-if args.verbose >= 2:
-    print(f'Running "{__file__}"')
-if args.verbose >= 1:
-    print(f'Input path is "{inpath.resolve()}"...')
+if verbosity >= 2:
+    print(f'Running "{Path(__file__).resolve()}"...\n')
+if verbosity >= 1:
+    print(f'Input path is "{inpath.resolve()}".')
+    print(f'Output path is "{outpath.resolve()}".')
 
 
