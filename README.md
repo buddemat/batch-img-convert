@@ -1,0 +1,3 @@
+# batch-img-convert
+
+work in progres...
