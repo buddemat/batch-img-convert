@@ -7,11 +7,11 @@ maintainer: Matthias Budde
 '''
 import sys
 import argparse
+import pprint
 from pathlib import Path
 from multiprocessing import Pool, cpu_count
 import tqdm
 from PIL import Image
-import pprint
 
 def get_args():
     '''Parse command line arguments.'''
@@ -66,9 +66,9 @@ def get_args():
 
 def convert_img(file):
     '''Load file convert it.'''
-    with Image.open(file) as im:
+    with Image.open(file) as img:
         if opts['verbosity'] >= 3:
-            print(f'Reading "{im.filename}"...')
+            print(f'Reading "{img.filename}"...')
         file_new = file.relative_to(opts['inpath'])
         file_new = opts['outpath'] / file_new.with_suffix('.png')
         # create folders if they don't exist
@@ -76,9 +76,9 @@ def convert_img(file):
         if opts['verbosity'] >= 3:
             print(f'Writing "{file_new}"...')
         if opts['scale']:
-            factor = 1 / opts['scale'] 
-            im = im.resize((int(im.width // factor), int(im.height // factor)))
-        im.save(file_new, 'PNG')
+            factor = 1 / opts['scale']
+            img = img.resize((int(img.width // factor), int(img.height // factor)))
+        img.save(file_new, 'PNG')
         return file_new
 
 if __name__ == '__main__':
