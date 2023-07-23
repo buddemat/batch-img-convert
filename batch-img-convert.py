@@ -18,7 +18,15 @@ def get_args():
     cpucount = cpu_count()
     parser = argparse.ArgumentParser()
     verbosity_argument_group = parser.add_mutually_exclusive_group()
+    resume_argument_group = parser.add_mutually_exclusive_group()
     parser.add_argument('inpath', help='input path for image conversion', default='.')
+    resume_argument_group.add_argument('-c', '--continue',
+                                       help='skip existing files, mutually exclusive with --force',
+                                       action='store_true')
+    resume_argument_group.add_argument('-f', '--force',
+                                       help='overwrite existing files, mutually exclusive with --continue',
+                                       action='store_true',
+                                       dest='overwrite')
     parser.add_argument('-p', '--pool',
                         type=int,
                         help='poolsize for data parallelism (int in range [1,maxcpus]), \
@@ -76,29 +84,41 @@ def get_args():
 
 def convert_img(file):
     '''Load file, convert it.'''
-    with Image.open(file) as img:
-        if opts['verbosity'] >= 3:
-            print(f'Reading "{img.filename}"...')
+    # build target file path
+    file_new = file.relative_to(opts['inpath'])
+    file_new = opts['outpath'] / file_new.with_suffix('')
 
-        # conversion
-        if opts['scale']:
-            factor = 1 / opts['scale']
-            img = img.resize((int(img.width // factor), int(img.height // factor)))
-
-        # build target file path
-        file_new = file.relative_to(opts['inpath'])
-        file_new = opts['outpath'] / file_new.with_suffix('')
-
-        # create folders if they don't exist
-        file_new.parent.mkdir(parents=True, exist_ok=True)
-
-        if opts['verbosity'] >= 3:
-            print(f'Writing "{file_new}"...')
-
+    # if check if target files already exist
+    formats_to_encode =  opts['outtypes'].copy()
+    if opts['continue']:
         for target_format in opts['outtypes']:
-            file_new = file_new.with_suffix(f'.{target_format.lower()}')
-            img.save(file_new, target_format)
-        return True
+            check_file = file_new.with_suffix(f'.{target_format.lower()}')
+            if check_file.is_file():
+                if opts['verbosity'] >= 3:
+                    print(f'"{check_file}" already exists, skipping...')
+                formats_to_encode.remove(target_format)
+
+    if formats_to_encode:
+        with Image.open(file) as img:
+            if opts['verbosity'] >= 3:
+                print(f'Reading "{img.filename}"...')
+
+            # conversion
+            if opts['scale']:
+                factor = 1 / opts['scale']
+                img = img.resize((int(img.width // factor), int(img.height // factor)))
+
+            # create folders if they don't exist
+            file_new.parent.mkdir(parents=True, exist_ok=True)
+
+            for target_format in formats_to_encode:
+                file_new = file_new.with_suffix(f'.{target_format.lower()}')
+                if opts['verbosity'] >= 3:
+                    print(f'Writing "{file_new}"...')
+                img.save(file_new, target_format)
+        return file_new
+    else:
+        return None
 
 if __name__ == '__main__':
     opts = get_args()
@@ -124,10 +144,11 @@ if __name__ == '__main__':
     if filenum < 1:
         sys.exit(f'Error: No suitable files found in "{opts["inpath"]}". Exiting...')
 
-    try:
-        opts['outpath'].mkdir(parents=False, exist_ok=False)
-    except FileExistsError as err:
-        sys.exit(f'Error: The target folder already exists! {err}. Exiting...')
+    if not opts['continue']:
+        try:
+            opts['outpath'].mkdir(parents=False, exist_ok=opts['overwrite'])
+        except FileExistsError as err:
+            sys.exit(f'Error: The target folder already exists! {err}. Exiting...')
 
 
     # parallel processing
