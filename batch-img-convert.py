@@ -56,10 +56,6 @@ def get_args():
     # replace strings with paths
     opts_dict['inpath'] = Path(args.inpath)
     opts_dict['outpath'] = opts_dict['inpath'] / 'converted'
-    try:
-        opts_dict['outpath'].mkdir(parents=False, exist_ok=False)
-    except FileExistsError as err:
-        sys.exit(f'Error: The target folder already exists! {err} Exiting...')
 
     if args.quiet:
         opts_dict['verbosity'] = -1
@@ -97,9 +93,7 @@ if __name__ == '__main__':
         print(f'Output path is "{opts["outpath"].resolve()}".')
         print('')
 
-
-    # parallel processing
-    # TODO: expand beyond tiffs
+    # prepare 
     if opts['recursive']:
         p = opts['inpath'].rglob('*.tif')
     else:
@@ -108,8 +102,16 @@ if __name__ == '__main__':
     filenum = len(fileslist)
 
     if filenum < 1:
-        print('No files found, exiting...')
-        sys.exit()
+        sys.exit(f'Error: No suitable files found in "{opts["inpath"]}". Exiting...')
+
+    try:
+        opts_dict['outpath'].mkdir(parents=False, exist_ok=False)
+    except FileExistsError as err:
+        sys.exit(f'Error: The target folder already exists! {err}. Exiting...')
+
+
+    # parallel processing
+    # TODO: expand beyond tiffs
 
     if opts['verbosity'] >= 1:
         print(f'Found {filenum} .tif files. Converting to .png...')
