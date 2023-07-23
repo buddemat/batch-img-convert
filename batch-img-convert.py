@@ -24,11 +24,12 @@ def get_args():
                         action='store_true')
     parser.add_argument('-p', '--pool',
                         type=int,
-                        help='poolsize for data parallelism. \
+                        help='poolsize for data parallelism (int in range [1,maxcpus]). \
                               if option string is present without argument, then half \
                               the number of cpus are used.',
                         const=cpucount//2,
                         default=1,
+                        choices=range(1,cpucount+1),
                         nargs='?')
     parser.add_argument('-s', '--scale',
                         type=float,
