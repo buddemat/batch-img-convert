@@ -10,6 +10,7 @@ import argparse
 from pathlib import Path
 from multiprocessing import Pool, cpu_count
 import tqdm
+from PIL import Image
 
 
 def get_args():
@@ -45,8 +46,11 @@ def get_args():
 
     # replace strings with paths
     opts_dict['inpath'] = Path(args.inpath)
-    # TODO: check if outpath exists? Or do that later on creation?
     opts_dict['outpath'] = opts_dict['inpath'] / 'converted'
+    try:
+        opts_dict['outpath'].mkdir(parents=False, exist_ok=False)
+    except FileExistsError as err:
+        sys.exit(f'Error: The target folder already exists! {err} Exiting...')
 
     if args.quiet:
         opts_dict['verbosity'] = -1
@@ -58,17 +62,22 @@ def get_args():
 
 def convert_img(file):
     '''Load file convert it.'''
-    with open(file, 'r', encoding='utf-8') as f:
-        # TODO: do I need to open it?
+    with Image.open(file) as im:
         if opts['verbosity'] >= 2:
-            print(file)
-        return False
-
+            print(f'Reading "{im.filename}"...')
+        file_new = file.relative_to(opts['inpath'])
+        file_new = opts['outpath'] / file_new.with_suffix('.png')
+        # create folders if they don't exist
+        file_new.parent.mkdir(parents=True, exist_ok=True)
+        if opts['verbosity'] >= 2:
+            print(f'Writing "{file_new}"...')
+        im.save(file_new, 'PNG')
+        return file_new
 
 if __name__ == '__main__':
     opts = get_args()
 
-    # temporary code
+    # info
     if opts['verbosity'] >= 2:
         print(f'Running "{Path(__file__).resolve()}"...\n')
     if opts['verbosity'] >= 1:
@@ -78,16 +87,20 @@ if __name__ == '__main__':
 
 
     # parallel processing
+    # TODO: expand beyond tiffs
     if opts['recursive']:
-        p = opts['inpath'].rglob('*.tif') # TODO: expand beyonf tiffs
+        p = opts['inpath'].rglob('*.tif')
     else:
-        p = opts['inpath'].glob('*.tif') # TODO: expand beyonf tiffs
+        p = opts['inpath'].glob('*.tif')
     fileslist = [f for f in p if f.is_file()]
     filenum = len(fileslist)
 
     if filenum < 1:
         print('No files found, exiting...')
         sys.exit()
+
+    if opts['verbosity'] >= 1:
+        print(f'Found {filenum} .tif files. Converting to .png...')
 
     with Pool(opts['poolsize']) as p:
         r = list(tqdm.tqdm(p.imap(convert_img, fileslist), total=filenum))
