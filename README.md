@@ -19,16 +19,17 @@ batch-img-convert.py [-h] [-p [1:MAXCPUS]] [-q] [-r] [-s FACTOR] [-t {PNG,JPEG}]
 #### Optional arguments
 ``` 
   -h, --help            show help message and exit
-  -r, --recursive       whether to traverse subfolders of inpath
+  -c, --continue        skip existing files, mutually exclusive with --force
+  -f, --force           overwrite existing files, mutually exclusive with --continue
   -p POOLSIZE, --pool POOLSIZE
-                        poolsize for data parallelism (int in range [1,maxcpus]), half the number of cpus if "--pool"
-                        is specified without argument
+                        poolsize for data parallelism (int in range [1,maxcpus]), half the number of cpus if "--pool" is specified without argument
+  -q, --quiet           suppress output, mutually exclusive with --verbose
+  -r, --recursive       whether to traverse subfolders of inpath
   -s FACTOR, --scale FACTOR
                         scale factor to apply
   -t {PNG,JPEG}, --target {PNG,JPEG}
-                        target output format(s), default: PNG
+                        target output format(s), multiple possible, default: PNG
   -v, --verbose         verbosity level (incremental, up to 3: -vvv)
-  -q, --quiet           suppress output, mutually exclusive with --verbose
 ``` 
 
 
