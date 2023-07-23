@@ -17,11 +17,8 @@ def get_args():
     '''Parse command line arguments.'''
     cpucount = cpu_count()
     parser = argparse.ArgumentParser()
-    argument_group = parser.add_mutually_exclusive_group()
+    verbosity_argument_group = parser.add_mutually_exclusive_group()
     parser.add_argument('inpath', help='input path for image conversion', default='.')
-    parser.add_argument('-r', '--recursive',
-                        help='whether to traverse subfolders of inpath',
-                        action='store_true')
     parser.add_argument('-p', '--pool',
                         type=int,
                         help='poolsize for data parallelism (int in range [1,maxcpus]), \
@@ -33,6 +30,12 @@ def get_args():
                         nargs='?',
                         metavar=f'1:MAXCPUS',
                         dest='poolsize')
+    verbosity_argument_group.add_argument('-q', '--quiet',
+                                          help='suppress output, mutually exclusive with --verbose',
+                                          action='store_true')
+    parser.add_argument('-r', '--recursive',
+                        help='whether to traverse subfolders of inpath',
+                        action='store_true')
     parser.add_argument('-s', '--scale',
                         type=float,
                         metavar='FACTOR',
@@ -46,14 +49,11 @@ def get_args():
                         default=None, 
                         action='append',
                         dest='outtypes')
-    argument_group.add_argument('-v', '--verbose',
-                                help='verbosity level (incremental, up to 3: -vvv)',
-                                action='count',
-                                default=0,
-                                dest='verbosity')
-    argument_group.add_argument('-q', '--quiet',
-                                help='suppress output, mutually exclusive with --verbose',
-                                action='store_true')
+    verbosity_argument_group.add_argument('-v', '--verbose',
+                                          help='verbosity level (incremental, up to 3: -vvv)',
+                                          action='count',
+                                          default=0,
+                                          dest='verbosity')
     args = parser.parse_args()
 
     # process args into dict
@@ -137,4 +137,7 @@ if __name__ == '__main__':
         print(f'Found {filenum} TIF files. Converting to {", ".join(opts["outtypes"])} using {opts["poolsize"]} cores...')
 
     with Pool(opts['poolsize']) as p:
-        r = list(tqdm.tqdm(p.imap(convert_img, fileslist), total=filenum))
+        if opts['verbosity'] >= 0:
+            r = list(tqdm.tqdm(p.imap(convert_img, fileslist), total=filenum))
+        else:
+            r = p.map(convert_img, fileslist)
