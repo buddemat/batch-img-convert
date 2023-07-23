@@ -31,7 +31,7 @@ def get_args():
                         default=1,
                         choices=range(1,cpucount+1),
                         nargs='?',
-                        metavar=f'1:{cpucount}',
+                        metavar=f'1:MAXCPUS',
                         dest='poolsize')
     parser.add_argument('-s', '--scale',
                         type=float,
