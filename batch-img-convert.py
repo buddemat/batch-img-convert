@@ -7,7 +7,7 @@ maintainer: Matthias Budde
 '''
 import sys
 import argparse
-import pprint
+from pprint import pprint
 from pathlib import Path
 from multiprocessing import Pool, cpu_count
 import tqdm
@@ -117,7 +117,7 @@ def convert_img(file):
                 if opts['verbosity'] >= 3:
                     print(f'Writing "{file_new}"...')
                 img.save(file_new, target_format)
-        return file_new
+        return file
     return None
 
 if __name__ == '__main__':
@@ -126,9 +126,9 @@ if __name__ == '__main__':
     # info
     if opts['verbosity'] >= 2:
         print(f'Running "{Path(__file__).resolve()}"...\n')
-        print(pprint.pprint(opts, indent=4))
+        pprint(opts, indent=4)
         print('')
-    if opts['verbosity'] >= 1:
+    elif opts['verbosity'] >= 1:
         print(f'Input path is "{opts["inpath"].resolve()}".')
         print(f'Output path is "{opts["outpath"].resolve()}".')
         print('')
@@ -155,8 +155,8 @@ if __name__ == '__main__':
     # TODO: expand beyond tiffs
 
     if opts['verbosity'] >= 1:
-        print(f'Found {filenum} TIF files. Converting to {", ".join(opts["outtypes"])} \
-                using {opts["poolsize"]} cores...')
+        print(f'Found {filenum} TIF files. Converting to {", ".join(opts["outtypes"])} ' \
+              f'using {opts["poolsize"]} cores...')
 
     with Pool(opts['poolsize']) as p:
         if opts['verbosity'] >= 0:
