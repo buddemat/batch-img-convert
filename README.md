@@ -25,6 +25,8 @@ batch-img-convert.py [-h] [-r] [-p [1:MAXCPUS]] [-s FACTOR] [-v | -q] inpath
                         is specified without argument
   -s FACTOR, --scale FACTOR
                         scale factor to apply
+  -t {PNG,JPEG}, --target {PNG,JPEG}
+                        target output format(s), default: PNG
   -v, --verbose         verbosity level (incremental, up to 3: -vvv)
   -q, --quiet           suppress output, mutually exclusive with --verbose
 ``` 
