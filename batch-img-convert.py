@@ -24,7 +24,8 @@ def get_args():
                                        help='skip existing files, mutually exclusive with --force',
                                        action='store_true')
     resume_argument_group.add_argument('-f', '--force',
-                                       help='overwrite existing files, mutually exclusive with --continue',
+                                       help='overwrite existing files, mutually exclusive \
+                                             with --continue',
                                        action='store_true',
                                        dest='overwrite')
     parser.add_argument('-p', '--pool',
@@ -36,7 +37,7 @@ def get_args():
                         default=1,
                         choices=range(1,cpucount+1),
                         nargs='?',
-                        metavar=f'1:MAXCPUS',
+                        metavar='1:MAXCPUS',
                         dest='poolsize')
     verbosity_argument_group.add_argument('-q', '--quiet',
                                           help='suppress output, mutually exclusive with --verbose',
@@ -54,7 +55,7 @@ def get_args():
                         help='target output format(s), default: PNG',
                         choices=['PNG','JPEG'],
                         # do not set 'default', as 'append' will always include default value
-                        default=None, 
+                        default=None,
                         action='append',
                         dest='outtypes')
     verbosity_argument_group.add_argument('-v', '--verbose',
@@ -117,8 +118,7 @@ def convert_img(file):
                     print(f'Writing "{file_new}"...')
                 img.save(file_new, target_format)
         return file_new
-    else:
-        return None
+    return None
 
 if __name__ == '__main__':
     opts = get_args()
@@ -133,7 +133,7 @@ if __name__ == '__main__':
         print(f'Output path is "{opts["outpath"].resolve()}".')
         print('')
 
-    # prepare 
+    # prepare
     if opts['recursive']:
         p = opts['inpath'].rglob('*.tif')
     else:
@@ -155,7 +155,8 @@ if __name__ == '__main__':
     # TODO: expand beyond tiffs
 
     if opts['verbosity'] >= 1:
-        print(f'Found {filenum} TIF files. Converting to {", ".join(opts["outtypes"])} using {opts["poolsize"]} cores...')
+        print(f'Found {filenum} TIF files. Converting to {", ".join(opts["outtypes"])} \
+                using {opts["poolsize"]} cores...')
 
     with Pool(opts['poolsize']) as p:
         if opts['verbosity'] >= 0:
