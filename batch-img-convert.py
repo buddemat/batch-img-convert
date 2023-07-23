@@ -18,31 +18,34 @@ def get_args():
     cpucount = cpu_count()
     parser = argparse.ArgumentParser()
     argument_group = parser.add_mutually_exclusive_group()
-    parser.add_argument('inpath', help='input path for image conversion.', default='.')
+    parser.add_argument('inpath', help='input path for image conversion', default='.')
     parser.add_argument('-r', '--recursive',
-                        help='whether to traverse subfolders of inpath.',
+                        help='whether to traverse subfolders of inpath',
                         action='store_true')
     parser.add_argument('-p', '--pool',
                         type=int,
-                        help='poolsize for data parallelism (int in range [1,maxcpus]). \
-                              if option string is present without argument, then half \
-                              the number of cpus are used.',
+                        help='poolsize for data parallelism (int in range [1,maxcpus]), \
+                              half the number of cpus if "--pool" is specified without \
+                              following argument',
                         const=cpucount//2,
                         default=1,
                         choices=range(1,cpucount+1),
                         nargs='?',
+                        metavar=f'1:{cpucount}',
                         dest='poolsize')
     parser.add_argument('-s', '--scale',
                         type=float,
-                        help='scale factor to apply.',
+                        metavar='FACTOR',
+                        help='scale factor to apply',
+
                         default=None)
     argument_group.add_argument('-v', '--verbose',
-                                help='verbosity level (incremental, up to 3: -vvv).',
+                                help='verbosity level (incremental, up to 3: -vvv)',
                                 action='count',
                                 default=0,
                                 dest='verbosity')
     argument_group.add_argument('-q', '--quiet',
-                                help='suppress output, mutually exclusive with --verbose.',
+                                help='suppress output, mutually exclusive with --verbose',
                                 action='store_true')
     args = parser.parse_args()
 
