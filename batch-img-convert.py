@@ -37,8 +37,15 @@ def get_args():
                         type=float,
                         metavar='FACTOR',
                         help='scale factor to apply',
-
                         default=None)
+    parser.add_argument('-t', '--target',
+                        #metavar='TYPE',
+                        help='target output format(s), default: PNG',
+                        choices=['PNG','JPEG'],
+                        # do not set 'default', as 'append' will always include default value
+                        default=None, 
+                        action='append',
+                        dest='outtypes')
     argument_group.add_argument('-v', '--verbose',
                                 help='verbosity level (incremental, up to 3: -vvv)',
                                 action='count',
@@ -53,6 +60,10 @@ def get_args():
     opts_dict = args.__dict__
     opts_dict['cpucount'] = cpucount
 
+    # check output formats
+    if opts_dict['outtypes'] is None:
+        opts_dict['outtypes'] = ['PNG']
+
     # replace strings with paths
     opts_dict['inpath'] = Path(args.inpath)
     opts_dict['outpath'] = opts_dict['inpath'] / 'converted'
@@ -64,21 +75,30 @@ def get_args():
 
 
 def convert_img(file):
-    '''Load file convert it.'''
+    '''Load file, convert it.'''
     with Image.open(file) as img:
         if opts['verbosity'] >= 3:
             print(f'Reading "{img.filename}"...')
-        file_new = file.relative_to(opts['inpath'])
-        file_new = opts['outpath'] / file_new.with_suffix('.png')
-        # create folders if they don't exist
-        file_new.parent.mkdir(parents=True, exist_ok=True)
-        if opts['verbosity'] >= 3:
-            print(f'Writing "{file_new}"...')
+
+        # conversion
         if opts['scale']:
             factor = 1 / opts['scale']
             img = img.resize((int(img.width // factor), int(img.height // factor)))
-        img.save(file_new, 'PNG')
-        return file_new
+
+        # build target file path
+        file_new = file.relative_to(opts['inpath'])
+        file_new = opts['outpath'] / file_new.with_suffix('')
+
+        # create folders if they don't exist
+        file_new.parent.mkdir(parents=True, exist_ok=True)
+
+        if opts['verbosity'] >= 3:
+            print(f'Writing "{file_new}"...')
+
+        for target_format in opts['outtypes']:
+            file_new = file_new.with_suffix(f'.{target_format.lower()}')
+            img.save(file_new, target_format)
+        return True
 
 if __name__ == '__main__':
     opts = get_args()
@@ -105,7 +125,7 @@ if __name__ == '__main__':
         sys.exit(f'Error: No suitable files found in "{opts["inpath"]}". Exiting...')
 
     try:
-        opts_dict['outpath'].mkdir(parents=False, exist_ok=False)
+        opts['outpath'].mkdir(parents=False, exist_ok=False)
     except FileExistsError as err:
         sys.exit(f'Error: The target folder already exists! {err}. Exiting...')
 
@@ -114,7 +134,7 @@ if __name__ == '__main__':
     # TODO: expand beyond tiffs
 
     if opts['verbosity'] >= 1:
-        print(f'Found {filenum} .tif files. Converting to .png...')
+        print(f'Found {filenum} TIF files. Converting to {", ".join(opts["outtypes"])} using {opts["poolsize"]} cores...')
 
     with Pool(opts['poolsize']) as p:
         r = list(tqdm.tqdm(p.imap(convert_img, fileslist), total=filenum))
