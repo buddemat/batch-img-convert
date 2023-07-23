@@ -11,7 +11,7 @@ from pathlib import Path
 from multiprocessing import Pool, cpu_count
 import tqdm
 from PIL import Image
-
+import pprint
 
 def get_args():
     '''Parse command line arguments.'''
@@ -30,6 +30,10 @@ def get_args():
                         const=cpucount//2,
                         default=1,
                         nargs='?')
+    parser.add_argument('-s', '--scale',
+                        type=float,
+                        help='scale factor to apply.',
+                        default=None)
     argument_group.add_argument('-v', '--verbose',
                                 help='verbosity level (can be specified multiple times)',
                                 action='count',
@@ -63,14 +67,17 @@ def get_args():
 def convert_img(file):
     '''Load file convert it.'''
     with Image.open(file) as im:
-        if opts['verbosity'] >= 2:
+        if opts['verbosity'] >= 3:
             print(f'Reading "{im.filename}"...')
         file_new = file.relative_to(opts['inpath'])
         file_new = opts['outpath'] / file_new.with_suffix('.png')
         # create folders if they don't exist
         file_new.parent.mkdir(parents=True, exist_ok=True)
-        if opts['verbosity'] >= 2:
+        if opts['verbosity'] >= 3:
             print(f'Writing "{file_new}"...')
+        if opts['scale']:
+            factor = 1 / opts['scale'] 
+            im = im.resize((int(im.width // factor), int(im.height // factor)))
         im.save(file_new, 'PNG')
         return file_new
 
@@ -80,10 +87,12 @@ if __name__ == '__main__':
     # info
     if opts['verbosity'] >= 2:
         print(f'Running "{Path(__file__).resolve()}"...\n')
+        print(pprint.pprint(opts, indent=4))
+        print('')
     if opts['verbosity'] >= 1:
         print(f'Input path is "{opts["inpath"].resolve()}".')
         print(f'Output path is "{opts["outpath"].resolve()}".')
-    print('')
+        print('')
 
 
     # parallel processing
