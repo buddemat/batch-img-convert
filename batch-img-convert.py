@@ -41,7 +41,10 @@ def get_args():
                         dest='poolsize')
     verbosity_argument_group.add_argument('-q', '--quiet',
                                           help='suppress output, mutually exclusive with --verbose',
-                                          action='store_true')
+                                          action='store_const',
+                                          default=0,
+                                          const=-1,
+                                          dest='verbosity')
     parser.add_argument('-r', '--recursive',
                         help='whether to traverse subfolders of inpath',
                         action='store_true')
@@ -77,9 +80,6 @@ def get_args():
     opts_dict['inpath'] = Path(args.inpath)
     opts_dict['outpath'] = opts_dict['inpath'] / 'converted'
 
-    if args.quiet:
-        opts_dict['verbosity'] = -1
-    opts_dict.pop('quiet')
     return opts_dict
 
 
