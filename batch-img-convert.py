@@ -69,7 +69,7 @@ def get_args():
     args = parser.parse_args()
 
     # process args into dict
-    opts_dict = args.__dict__
+    opts_dict = args.__dict__.copy()
     opts_dict['cpucount'] = cpucount
 
     # check output formats
