@@ -21,6 +21,7 @@ def get_args():
     verbosity_argument_group = parser.add_mutually_exclusive_group()
     resume_argument_group = parser.add_mutually_exclusive_group()
     parser.add_argument('inpath', help='input path for image conversion', default='.')
+    parser.add_argument('outpath', help='output path for image conversion (optional)', nargs='?')
     resume_argument_group.add_argument('-c', '--continue',
                                        help='skip existing files, mutually exclusive with --force',
                                        action='store_true')
@@ -78,8 +79,11 @@ def get_args():
         opts_dict['outtypes'] = ['PNG']
 
     # replace strings with paths
-    opts_dict['inpath'] = Path(args.inpath)
-    opts_dict['outpath'] = opts_dict['inpath'] / 'converted'
+    opts_dict['inpath'] = Path(args.inpath).resolve()
+    if not args.outpath:
+        opts_dict['outpath'] = opts_dict['inpath'] / 'converted'
+    else:
+        opts_dict['outpath'] = Path(args.outpath).resolve()
 
     return opts_dict
 
@@ -130,8 +134,8 @@ if __name__ == '__main__':
         pprint(opts, indent=4)
         print('')
     elif opts['verbosity'] >= 1:
-        print(f'Input path is "{opts["inpath"].resolve()}".')
-        print(f'Output path is "{opts["outpath"].resolve()}".')
+        print(f'Input path is "{opts["inpath"]}".')
+        print(f'Output path is "{opts["outpath"]}".')
         print('')
 
     # prepare

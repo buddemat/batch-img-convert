@@ -8,15 +8,17 @@ Batch image conversion script in Python.
 ## Usage
 
 ``` 
-batch-img-convert.py [-h] [-c | -f] [-p [1:MAXCPUS]] [-q] [-r] [-s FACTOR] [-t {PNG,JPEG}] [-v] inpath
+batch-img-convert.py [-h] [-c | -f] [-p [1:MAXCPUS]] [-q] [-r] [-s FACTOR] [-t {PNG,JPEG}] [-v] inpath [outpath]
 ``` 
 #### Positional arguments
  
 ``` 
 inpath                               input (root) path for image conversion
+outpath                              output path for image conversion (optional)
+
 ``` 
 
-#### Optional arguments
+#### Option arguments
 ``` 
 -h, --help                           show help message and exit
 
