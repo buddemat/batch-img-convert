@@ -143,13 +143,13 @@ if __name__ == '__main__':
     filenum = len(fileslist)
 
     if filenum < 1:
-        sys.exit(f'Error: No suitable files found in "{opts["inpath"]}". Exiting...')
+        sys.exit(f'Error: No suitable files found in "{opts["inpath"]}". Use --recursive to include subfolders. Exiting...')
 
     if not opts['continue']:
         try:
             opts['outpath'].mkdir(parents=False, exist_ok=opts['overwrite'])
         except FileExistsError as err:
-            sys.exit(f'Error: The target folder already exists! {err}. Exiting...')
+            sys.exit(f'Error: The target folder already exists! Use --force to overwrite. {err}. Exiting...')
 
 
     # parallel processing
