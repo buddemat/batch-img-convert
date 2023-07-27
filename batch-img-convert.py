@@ -26,12 +26,15 @@ def test_scale_type(arg):
         pass
     try: 
         arg = float(arg)
-        if not 0.1 <= arg <= 4.0:
+        if arg < 0.1:
+            msg = 'Scale factor too small, must be between 0.1 and 4.0.'
+        elif arg > 4.0:
             msg = 'Scale factor too large, must be between 0.1 and 4.0.'
-            raise argparse.ArgumentTypeError(msg)
-        return arg
+        else:
+            return arg
+        raise argparse.ArgumentTypeError(msg)
     except ValueError as err:
-        raise argparse.ArgumentTypeError(err)
+        raise argparse.ArgumentTypeError(f'Scale parameter not valid int or float: {err}.')
 
 
 def get_args():
