@@ -78,7 +78,7 @@ def get_args():
     parser.add_argument('-t', '--target',
                         #metavar='TYPE',
                         help='target output format(s), default: PNG',
-                        choices=['PNG','JPEG'],
+                        choices=['PNG','JPG'],
                         # do not set 'default', as 'append' will always include default value
                         default=None,
                         action='append',
@@ -161,7 +161,8 @@ def convert_img(file):
                 file_new = file_new.with_suffix(f'.{target_format.lower()}')
                 if opts['verbosity'] >= 3:
                     print(f'Writing "{file_new}"...')
-                img.save(file_new, target_format)
+                # format is automatically determined from extension
+                img.save(file_new, quality=100, subsampling=0)
         return file
     return None
 
