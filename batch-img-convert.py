@@ -23,8 +23,9 @@ def test_scale_type(arg):
             raise argparse.ArgumentTypeError(msg)
         return arg
     except ValueError:
+        # not an int, let's try float below...
         pass
-    try: 
+    try:
         arg = float(arg)
         if arg < 0.1:
             msg = 'Scale factor too small, must be between 0.1 and 4.0.'
@@ -33,8 +34,8 @@ def test_scale_type(arg):
         else:
             return arg
         raise argparse.ArgumentTypeError(msg)
-    except ValueError as err:
-        raise argparse.ArgumentTypeError(f'Scale parameter not valid int or float: {err}.')
+    except ValueError as verr:
+        raise argparse.ArgumentTypeError(f'Scale parameter not valid int or float: {verr}.')
 
 
 def get_args():
@@ -111,7 +112,8 @@ def get_args():
     # check if scaling is meant to be relative or absolute
     if isinstance(opts_dict['scale'], int):
         if opts_dict['verbosity'] >= 2:
-            print('As --scale parameter is of type int, interpreting as absolute resolution value (keeping aspect ratio).')
+            print('As --scale parameter is of type int, interpreting as absolute' \
+                  'resolution value (keeping aspect ratio).')
         opts_dict['scaleabs'] = opts_dict.pop('scale')
     elif isinstance(opts_dict['scale'], float):
         if opts_dict['verbosity'] >= 2:
@@ -191,13 +193,15 @@ if __name__ == '__main__':
     filenum = len(fileslist)
 
     if filenum < 1:
-        sys.exit(f'Error: No suitable files found in "{opts["inpath"]}". Use --recursive to include subfolders. Exiting...')
+        sys.exit(f'Error: No suitable files found in "{opts["inpath"]}".' \
+                  'Use --recursive to include subfolders. Exiting...')
 
     if not opts['continue']:
         try:
             opts['outpath'].mkdir(parents=False, exist_ok=opts['overwrite'])
-        except FileExistsError as err:
-            sys.exit(f'Error: The target folder already exists! Use --force to overwrite. {err}. Exiting...')
+        except FileExistsError as ferr:
+            sys.exit('Error: Target folder already exists!' \
+                    f'Use --force to overwrite. {ferr}. Exiting...')
 
 
     # parallel processing
