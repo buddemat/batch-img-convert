@@ -12,6 +12,7 @@ from pathlib import Path
 from multiprocessing import Pool, cpu_count
 import tqdm
 from PIL import Image
+from PIL.Image import Resampling
 
 def get_args():
     '''Parse command line arguments.'''
@@ -107,7 +108,7 @@ def convert_img(file):
             # conversion
             if opts['scale']:
                 factor = 1 / opts['scale']
-                img = img.resize((int(img.width // factor), int(img.height // factor)), Image.LANCZOS)
+                img = img.resize((int(img.width // factor), int(img.height // factor)), Resampling.LANCZOS)
 
             # create folders if they don't exist
             file_new.parent.mkdir(parents=True, exist_ok=True)
