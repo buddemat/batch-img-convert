@@ -14,6 +14,26 @@ import tqdm
 from PIL import Image
 from PIL.Image import Resampling
 
+def test_scale_type(arg):
+    '''Test whether scale argument is valid (float or int) for use in argparse argument.'''
+    try:
+        arg = int(arg)
+        if arg <= 160:
+            msg = 'Target resolution is too small, must be at least 160.'
+            raise argparse.ArgumentTypeError(msg)
+        return arg
+    except ValueError:
+        pass
+    try: 
+        arg = float(arg)
+        if not 0.1 <= arg <= 4.0:
+            msg = 'Scale factor too large, must be between 0.1 and 4.0.'
+            raise argparse.ArgumentTypeError(msg)
+        return arg
+    except ValueError as err:
+        raise argparse.ArgumentTypeError(err)
+
+
 def get_args():
     '''Parse command line arguments.'''
     cpucount = cpu_count()
@@ -51,9 +71,9 @@ def get_args():
                         help='whether to traverse subfolders of inpath',
                         action='store_true')
     parser.add_argument('-s', '--scale',
-                        type=float,
-                        metavar='FACTOR',
-                        help='scale factor to apply',
+                        type=test_scale_type,
+                        metavar='FACTOR|PIXELS',
+                        help='scale factor (if float) or target resolution (if int) to apply',
                         default=None)
     parser.add_argument('-t', '--target',
                         #metavar='TYPE',
@@ -85,6 +105,15 @@ def get_args():
     else:
         opts_dict['outpath'] = Path(args.outpath).resolve()
 
+    # check if scaling is meant to be relative or absolute
+    if isinstance(opts_dict['scale'], int):
+        if opts_dict['verbosity'] >= 2:
+            print('As --scale parameter is of type int, interpreting as absolute resolution value (keeping aspect ratio).')
+        opts_dict['scaleabs'] = opts_dict.pop('scale')
+    elif isinstance(opts_dict['scale'], float):
+        if opts_dict['verbosity'] >= 2:
+            print('As --scale parameter is of type float, interpreting as relative scale factor.')
+        opts_dict['scalefactor'] = opts_dict.pop('scale')
     return opts_dict
 
 
@@ -110,9 +139,20 @@ def convert_img(file):
                 print(f'Reading "{img.filename}"...')
 
             # conversion
-            if opts['scale']:
-                factor = 1 / opts['scale']
-                img = img.resize((int(img.width // factor), int(img.height // factor)), Resampling.LANCZOS)
+            if opts.get('scaleabs'):
+                if img.width > img.height:
+                    wdth = opts['scaleabs']
+                    hght = int(opts['scaleabs'] // (img.width/img.height))
+                else:
+                    wdth = int(opts['scaleabs'] // (img.height/img.width))
+                    hght = opts['scaleabs']
+            elif opts.get('scalefactor'):
+                wdth = int(img.width // (1/opts['scalefactor']))
+                hght = int(img.height // (1/opts['scalefactor']))
+            if opts.get('scaleabs') or opts.get('scalefactor'):
+                if opts['verbosity'] >= 3:
+                    print(f'Scaling to {wdth} x {hght} (width x height)')
+                img = img.resize((wdth, hght), Resampling.LANCZOS)
 
             # create folders if they don't exist
             file_new.parent.mkdir(parents=True, exist_ok=True)
@@ -130,7 +170,7 @@ if __name__ == '__main__':
 
     # info
     if opts['verbosity'] >= 2:
-        print(f'Running "{Path(__file__).resolve()}"...\n')
+        opts['scriptpath']= Path(__file__).resolve()
         pprint(opts, indent=4)
         print('')
     elif opts['verbosity'] >= 1:

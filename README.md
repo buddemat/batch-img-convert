@@ -8,7 +8,7 @@ Batch image conversion script in Python.
 ## Usage
 
 ``` 
-batch-img-convert.py [-h] [-c | -f] [-p [1:MAXCPUS]] [-q] [-r] [-s FACTOR] [-t {PNG,JPEG}] [-v] inpath [outpath]
+batch-img-convert.py [-h] [-c | -f] [-p [1:MAXCPUS]] [-q] [-r] [-s FACTOR|PX] [-t {PNG,JPEG}] [-v] inpath [outpath]
 ``` 
 #### Positional arguments
  
@@ -27,13 +27,13 @@ outpath                              output path for image conversion (optional)
 -f, --force                          overwrite existing files, mutually exclusive with --continue
 
 -p POOLSIZE, --pool POOLSIZE         poolsize for data parallelism (int in range [1,maxcpus]), half
-                                     the number of cpus if "--pool" is specified without argument
+                                     the number of cpus if "--pool" is specified without parameter
 
 -q, --quiet                          suppress output, mutually exclusive with --verbose
 
 -r, --recursive                      whether to traverse subfolders of inpath
 
--s FACTOR, --scale FACTOR            scale factor to apply
+-s FACTOR|PX, --scale FACTOR|PX      scale factor (if INT) or target resolution (if FLOAT)
 
 -t {PNG,JPEG}, --target {PNG,JPEG}   target output format(s), multiple possible, default: PNG
 
