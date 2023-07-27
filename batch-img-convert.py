@@ -107,7 +107,7 @@ def convert_img(file):
             # conversion
             if opts['scale']:
                 factor = 1 / opts['scale']
-                img = img.resize((int(img.width // factor), int(img.height // factor)))
+                img = img.resize((int(img.width // factor), int(img.height // factor)), Image.LANCZOS)
 
             # create folders if they don't exist
             file_new.parent.mkdir(parents=True, exist_ok=True)
