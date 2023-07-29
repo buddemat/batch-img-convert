@@ -13,6 +13,8 @@ from multiprocessing import Pool, cpu_count
 import tqdm
 from PIL import Image
 from PIL.Image import Resampling
+# disable max pixel limit, theoretically opens to decompression bomb DOS attack
+Image.MAX_IMAGE_PIXELS = None
 
 def test_scale_type(arg):
     '''Test whether scale argument is valid (float or int) for use in argparse argument.'''
