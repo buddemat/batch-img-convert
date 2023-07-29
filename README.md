@@ -15,7 +15,6 @@ batch-img-convert.py [-h] [-c | -f] [-p [1:MAXCPUS]] [-q] [-r] [-s FACTOR|PX] [-
 ``` 
 inpath                             input (root) path for image conversion
 outpath                            output path for image conversion (optional)
-
 ``` 
 
 #### Option arguments
