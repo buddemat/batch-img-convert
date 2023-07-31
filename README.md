@@ -2,7 +2,7 @@
 
 Batch image conversion script in Python.
 
-Reencodes all TIFF files found in the input folder (and optionally its subfolders) into PNG and/or JPG format. Can optionally also scale the images' resolution (either relative or absolute). Supports data parallelism through multiprocessing.
+Reencodes all TIFF files found in the input folder (and optionally its subfolders) to PNG and/or JPG format. Can optionally also scale the images' resolution (either relative or absolute). Supports data parallelism through multiprocessing.
 
 
 ## Usage
@@ -46,5 +46,6 @@ outpath                            output path for image conversion (optional)
 batch-img-convert
 ├── .gitignore
 ├── batch-img-convert.py               # Main conversion script
-└── README.md                          # This file
+├── README.md                          # This file
+└── requirements.txt                   # List of package dependencies
 ```
